@@ -2,6 +2,7 @@ package br.com.zup.proposta.controller;
 
 import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
 import br.com.zup.proposta.controller.request.TravelNoteRequestDto;
+import br.com.zup.proposta.controller.request.WalletRequestDto;
 import br.com.zup.proposta.dto.CreditCardDetailsDto;
 import br.com.zup.proposta.handler.ObjectHandler;
 import br.com.zup.proposta.model.BiometryImage;
@@ -16,10 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.websocket.server.PathParam;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/cartoes")
@@ -55,14 +55,12 @@ public class CreditCardController extends ObjectHandler {
     }
 
     @PostMapping("/bloqueios")
-    public ResponseEntity<?> block(@PathParam("id") String id, HttpServletRequest request) {
+    public ResponseEntity<?> block(@PathParam("id")
+                                   @Valid
+                                   @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
+                                   HttpServletRequest request) {
 
         LOGGER.info("Iniciando bloqueio do cartão...");
-        if (id == null) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Obrigatório informar o número do cartão.");
-            return ResponseEntity.badRequest().body(response);
-        }
 
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard ==  null) {
@@ -70,34 +68,52 @@ public class CreditCardController extends ObjectHandler {
         }
 
         CreditCard blockedCard = creditCardService.block(creditCard, request);
-        if (blockedCard == null) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Cartão já bloqueado.");
-            return ResponseEntity.unprocessableEntity().body(response);
-        }
+        ResponseEntity<?> response = creditCardService.checkForNull(blockedCard, "Cartão já bloqueado.");
+        if (response != null) return response;
 
-        return ResponseEntity.ok().body(new CreditCardDetailsDto(creditCard));
+        return ResponseEntity.ok().body(new CreditCardDetailsDto(blockedCard));
     }
 
     @PostMapping("/viagens")
-    public ResponseEntity<?> createTravelNote(@PathParam("id") String id,
-                                              @RequestBody @Valid TravelNoteRequestDto tavelNoteRequestDto,
+    public ResponseEntity<?> createTravelNote(@PathParam("id")
+                                              @Valid
+                                              @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
+                                              @RequestBody @Valid TravelNoteRequestDto travelNoteRequestDto,
                                               HttpServletRequest request) {
 
         LOGGER.info("Cadastrando aviso de viagem...");
-        if (id == null) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Obrigatório informar o número do cartão.");
-            return ResponseEntity.badRequest().body(response);
-        }
 
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard ==  null) {
             return ResponseEntity.notFound().build();
         }
 
-        CreditCard travelNoteCard = creditCardService.addTravelNote(creditCard, tavelNoteRequestDto, request);
+        CreditCard travelNoteCard = creditCardService.addTravelNote(creditCard, travelNoteRequestDto, request);
+        ResponseEntity<?> response = creditCardService.checkForNull(travelNoteCard, "Aviso de viagem já cadastrado.");
+        if (response != null) return response;
 
-        return ResponseEntity.ok().body(new CreditCardDetailsDto(creditCard));
+        return ResponseEntity.ok().body(new CreditCardDetailsDto(travelNoteCard));
+    }
+
+    @PostMapping("/carteiras")
+    public ResponseEntity<?> addDigitalWallet(@PathParam("id")
+                                              @Valid
+                                              @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
+                                              @RequestBody @Valid WalletRequestDto requestDto,
+                                              UriComponentsBuilder uriBuilder) {
+
+        LOGGER.info("Cadastrando carteira digital...");
+
+        CreditCard creditCard = checkCreditCardExists(id);
+        if (creditCard ==  null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        CreditCard walletCard = creditCardService.addDigitalWallet(creditCard, requestDto);
+        ResponseEntity<?> response = creditCardService.checkForNull(walletCard, "Carteira já cadastrada.");
+        if (response != null) return response;
+
+        URI location = creditCardService.buildUri(id, uriBuilder, walletCard);
+        return ResponseEntity.created(location).body(new CreditCardDetailsDto(walletCard));
     }
 }

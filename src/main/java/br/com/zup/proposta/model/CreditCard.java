@@ -210,4 +210,8 @@ public class CreditCard {
     public void addTravelNote(TravelNote travelNote) {
         this.travelNotes.add(travelNote);
     }
+
+    public void addWallet(Wallet wallet) {
+        this.wallets.add(wallet);
+    }
 }

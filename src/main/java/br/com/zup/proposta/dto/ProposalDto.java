@@ -15,7 +15,6 @@ public class ProposalDto {
     private BigDecimal income;
     private Address address;
     private Status status;
-    private String creditCard;
 
     public ProposalDto(Proposal proposal) {
         this.id = proposal.getId();
@@ -25,7 +24,6 @@ public class ProposalDto {
         this.income = proposal.getIncome();
         this.address = proposal.getAddress();
         this.status = proposal.getStatus();
-        this.creditCard = proposal.getCreditCard() != null ? proposal.getCreditCard().getId() : "0";
     }
 
     public Long getId() {
@@ -54,10 +52,6 @@ public class ProposalDto {
 
     public Status getStatus() {
         return status;
-    }
-
-    public String getCreditCard() {
-        return creditCard;
     }
 
     @Override

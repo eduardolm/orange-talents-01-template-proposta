@@ -52,7 +52,6 @@ public class ProposalDtoTest {
         assertNull(actualProposalDto.getEmail());
         assertNull(actualProposalDto.getAddress());
         assertNull(actualProposalDto.getStatus());
-        assertEquals("0", actualProposalDto.getCreditCard());
         assertNull(actualProposalDto.getName());
         assertNull(actualProposalDto.getDocument());
     }
@@ -67,7 +66,6 @@ public class ProposalDtoTest {
 
         assertNull(actualProposalDto.getId());
         assertEquals("Document", actualProposalDto.getDocument());
-        assertEquals("0", actualProposalDto.getCreditCard());
         assertEquals(Status.ELEGIVEL, actualProposalDto.getStatus());
         assertEquals("jane.doe@example.org", actualProposalDto.getEmail());
         assertSame(address, actualProposalDto.getAddress());
@@ -90,7 +88,6 @@ public class ProposalDtoTest {
         assertNull(actualProposalDto.getEmail());
         assertNull(actualProposalDto.getAddress());
         assertNull(actualProposalDto.getStatus());
-        assertNull(actualProposalDto.getCreditCard());
         assertNull(actualProposalDto.getName());
         assertNull(actualProposalDto.getDocument());
     }
