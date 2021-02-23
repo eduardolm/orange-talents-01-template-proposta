@@ -1,6 +1,5 @@
 package br.com.zup.proposta.service;
 
-import br.com.zup.proposta.controller.CreditCardController;
 import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
 import br.com.zup.proposta.enums.CreditCardStatus;
 import br.com.zup.proposta.model.*;
@@ -12,14 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -33,13 +29,9 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@AutoConfigureMockMvc
 @EnableConfigurationProperties
 @ExtendWith(SpringExtension.class)
 public class CreditCardServiceTest {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @MockBean
     private CreditCardRepository creditCardRepository;
@@ -56,12 +48,6 @@ public class CreditCardServiceTest {
     @MockBean
     private BiometricService biometricService;
 
-    @MockBean
-    private CreditCardController controller;
-
-    @Autowired
-    private WebApplicationContext wContext;
-
     private MultipartFile mockMultipartFile;
     private CreditCard creditCard;
     private BiometryImage biometryImage;
@@ -72,14 +58,14 @@ public class CreditCardServiceTest {
         // Create Creditcard
         LocalDateTime createdAt = LocalDateTime.of(1, 1, 1, 1, 1);
         HashSet<Blocked> blockedSet = new HashSet<>();
-        HashSet<Note> noteSet = new HashSet<>();
+        HashSet<TravelNote> travelNoteSet = new HashSet<>();
         HashSet<Wallet> walletSet = new HashSet<>();
         HashSet<Installment> installmentSet = new HashSet<>();
         Renegotiation renegotiation = new Renegotiation();
         DueDate dueDate = new DueDate("Test id", 20, LocalDateTime.now());
         Proposal proposal = new Proposal();
 
-        this.creditCard = new CreditCard("42", createdAt, "Name", blockedSet, noteSet, walletSet,
+        this.creditCard = new CreditCard("42", createdAt, "Name", blockedSet, travelNoteSet, walletSet,
                 installmentSet, 1, renegotiation, dueDate, proposal, CreditCardStatus.ATIVO);
 
         creditCardRepository.save(this.creditCard);
@@ -117,14 +103,14 @@ public class CreditCardServiceTest {
     public void shoudlReturnTrueForBLockedCreditCard() {
         LocalDateTime createdAt = LocalDateTime.of(1, 1, 1, 1, 1);
         HashSet<Blocked> blockedSet = new HashSet<>();
-        HashSet<Note> noteSet = new HashSet<>();
+        HashSet<TravelNote> travelNoteSet = new HashSet<>();
         HashSet<Wallet> walletSet = new HashSet<>();
         HashSet<Installment> installmentSet = new HashSet<>();
         Renegotiation renegotiation = new Renegotiation();
         DueDate dueDate = new DueDate("Test id", 20, LocalDateTime.now());
         Proposal proposal = new Proposal();
 
-        CreditCard creditCard1 = new CreditCard("42", createdAt, "Name", blockedSet, noteSet, walletSet,
+        CreditCard creditCard1 = new CreditCard("42", createdAt, "Name", blockedSet, travelNoteSet, walletSet,
                 installmentSet, 1, renegotiation, dueDate, proposal, CreditCardStatus.ATIVO);
         Blocked blocked = new Blocked("Test", true, creditCard1);
         blockedSet.add(blocked);
@@ -156,4 +142,6 @@ public class CreditCardServiceTest {
 
         assertEquals("Teste.jpg", biometryImage2.getOriginalFileName());
     }
+
+
 }

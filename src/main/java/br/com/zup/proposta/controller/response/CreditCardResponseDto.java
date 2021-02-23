@@ -14,7 +14,7 @@ public class CreditCardResponseDto {
     private LocalDateTime emitidoEm;
     private String titular;
     private Set<Blocked> bloqueios;
-    private Set<Note> avisos;
+    private Set<TravelNote> avisos;
     private Set<Wallet> carteiras;
     private Set<Installment> parcelas;
     private int limite;
@@ -31,7 +31,7 @@ public class CreditCardResponseDto {
                                  LocalDateTime emitidoEm,
                                  String titular,
                                  Set<Blocked> bloqueios,
-                                 Set<Note> avisos,
+                                 Set<TravelNote> avisos,
                                  Set<Wallet> carteiras,
                                  Set<Installment> parcelas,
                                  int limite,
@@ -68,7 +68,7 @@ public class CreditCardResponseDto {
         return bloqueios;
     }
 
-    public Set<Note> getAvisos() {
+    public Set<TravelNote> getAvisos() {
         return avisos;
     }
 

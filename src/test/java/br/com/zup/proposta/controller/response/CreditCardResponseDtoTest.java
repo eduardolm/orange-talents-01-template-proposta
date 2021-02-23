@@ -5,6 +5,7 @@ import br.com.zup.proposta.builder.CreditCardResponseDtoBuilder;
 import br.com.zup.proposta.builder.ProposalRequestDtoBuilder;
 import br.com.zup.proposta.controller.request.AddressRequestDto;
 import br.com.zup.proposta.controller.request.ProposalRequestDto;
+import br.com.zup.proposta.enums.CreditCardStatus;
 import br.com.zup.proposta.model.Proposal;
 import br.com.zup.proposta.repository.ProposalRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +34,18 @@ public class CreditCardResponseDtoTest {
 
     private AddressRequestDto address;
     private ProposalRequestDto proposalRequest;
+
+    @Test
+    public void testSetStatus() {
+        // Arrange
+        CreditCardResponseDto creditCardResponseDto = new CreditCardResponseDto();
+
+        // Act
+        creditCardResponseDto.setStatus(CreditCardStatus.ATIVO);
+
+        // Assert
+        assertEquals(CreditCardStatus.ATIVO, creditCardResponseDto.getStatus());
+    }
 
     @BeforeEach
     public void setup() {
@@ -95,6 +108,9 @@ public class CreditCardResponseDtoTest {
                         + " carteiras=null, parcelas=null, limite=0, renegociacao=null, vencimento=null, " +
                         "idProposta=null, status=null}",
                 (new CreditCardResponseDto()).toString());
+        assertEquals("CreditCardResponseDto{id='null', emitidoEm=null, titular='null', bloqueios=null, avisos=null,"
+                + " carteiras=null, parcelas=null, limite=0, renegociacao=null, vencimento=null, idProposta=null,"
+                + " status=null}", (new CreditCardResponseDto()).toString());
     }
 }
 

@@ -24,7 +24,7 @@ public class CreditCard {
 
     @OneToMany(mappedBy = "creditCard", cascade = CascadeType.PERSIST)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private Set<Note> notes = new HashSet<>();
+    private Set<TravelNote> travelNotes = new HashSet<>();
 
     @OneToMany(mappedBy = "creditCard", cascade = CascadeType.PERSIST)
     private Set<Wallet> wallets = new HashSet<>();
@@ -60,7 +60,7 @@ public class CreditCard {
                       LocalDateTime createdAt,
                       String name,
                       Set<Blocked> blockedSet,
-                      Set<Note> notes,
+                      Set<TravelNote> travelNotes,
                       Set<Wallet> wallets,
                       Set<Installment> installments,
                       int creditLimit,
@@ -73,7 +73,7 @@ public class CreditCard {
         this.createdAt = createdAt;
         this.name = name;
         this.blockedSet = blockedSet;
-        this.notes = notes;
+        this.travelNotes = travelNotes;
         this.wallets = wallets;
         this.installments = installments;
         this.creditLimit = creditLimit;
@@ -99,8 +99,8 @@ public class CreditCard {
         return blockedSet;
     }
 
-    public Set<Note> getNotes() {
-        return notes;
+    public Set<TravelNote> getNotes() {
+        return travelNotes;
     }
 
     public Set<Wallet> getWallets() {
@@ -182,7 +182,7 @@ public class CreditCard {
                 ", createdAt=" + createdAt +
                 ", name='" + name + '\'' +
                 ", blockedSet=" + blockedSet +
-                ", notes=" + notes +
+                ", notes=" + travelNotes +
                 ", wallets=" + wallets +
                 ", installments=" + installments +
                 ", creditLimit=" + creditLimit +
@@ -205,5 +205,9 @@ public class CreditCard {
         else if (!newStatus.equals("FALHA")) {
             this.setStatus(CreditCardStatus.ATIVO);
         }
+    }
+
+    public void addTravelNote(TravelNote travelNote) {
+        this.travelNotes.add(travelNote);
     }
 }

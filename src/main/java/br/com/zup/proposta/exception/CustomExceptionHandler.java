@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,13 +35,29 @@ public class CustomExceptionHandler {
         List<String> globalErrors = new ArrayList<>();
         globalErrors.add(exception.getMessage());
 
-        return buildIllegalArgumentError(globalErrors);
+        return buildIllegalStateError(globalErrors);
     }
 
-    private IllegalArgumentExceptionOutputDto buildIllegalStateExceptionError(List<String> globalErrors) {
+    private IllegalArgumentExceptionOutputDto buildIllegalStateError(List<String> globalErrors) {
         IllegalArgumentExceptionOutputDto notFoundErrors = new IllegalArgumentExceptionOutputDto();
 
         globalErrors.forEach(notFoundErrors::addError);
         return notFoundErrors;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ResponseStatusException.class)
+    public IllegalArgumentExceptionOutputDto handleResponseStatusErrors(ResponseStatusException exception) {
+        List<String> globalErrors = new ArrayList<>();
+        globalErrors.add(exception.getLocalizedMessage());
+
+        return buildResponseStatusException(globalErrors);
+    }
+
+    private IllegalArgumentExceptionOutputDto buildResponseStatusException(List<String> globalErrors) {
+        IllegalArgumentExceptionOutputDto errors = new IllegalArgumentExceptionOutputDto();
+
+        globalErrors.forEach(errors::addError);
+        return errors;
     }
 }

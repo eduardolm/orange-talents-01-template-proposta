@@ -1,6 +1,9 @@
 package br.com.zup.proposta.dto;
 
-import br.com.zup.proposta.model.*;
+import br.com.zup.proposta.model.CreditCard;
+import br.com.zup.proposta.model.Installment;
+import br.com.zup.proposta.model.Renegotiation;
+import br.com.zup.proposta.model.Wallet;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -12,7 +15,7 @@ public class CreditCardDetailsDto {
     private LocalDateTime createdAt;
     private String name;
     private Set<BlockedDto> blockedSet;
-    private Set<Note> notes;
+    private Set<TravelNoteDto> travelNotes;
     private Set<Wallet> wallets;
     private Set<Installment> installments;
     private int creditLimit;
@@ -27,7 +30,7 @@ public class CreditCardDetailsDto {
         this.createdAt = creditCard.getCreatedAt();
         this.name = creditCard.getName();
         this.blockedSet = creditCard.getBlockedSet().stream().map(BlockedDto::new).collect(Collectors.toSet());
-        this.notes = creditCard.getNotes();
+        this.travelNotes = creditCard.getNotes().stream().map(TravelNoteDto::new).collect(Collectors.toSet());
         this.wallets = creditCard.getWallets();
         this.installments = creditCard.getInstallments();
         this.creditLimit = creditCard.getCreditLimit();
@@ -54,8 +57,8 @@ public class CreditCardDetailsDto {
         return blockedSet;
     }
 
-    public Set<Note> getNotes() {
-        return notes;
+    public Set<TravelNoteDto> getNotes() {
+        return travelNotes;
     }
 
     public Set<Wallet> getWallets() {
@@ -97,7 +100,7 @@ public class CreditCardDetailsDto {
                 ", createdAt=" + createdAt +
                 ", name='" + name + '\'' +
                 ", blockedSet=" + blockedSet +
-                ", notes=" + notes +
+                ", notes=" + travelNotes +
                 ", wallets=" + wallets +
                 ", installments=" + installments +
                 ", creditLimit=" + creditLimit +

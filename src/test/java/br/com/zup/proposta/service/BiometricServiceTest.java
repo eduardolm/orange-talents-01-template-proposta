@@ -47,14 +47,14 @@ public class BiometricServiceTest {
         // Create Creditcard
         LocalDateTime createdAt = LocalDateTime.of(1, 1, 1, 1, 1);
         HashSet<Blocked> blockedSet = new HashSet<>();
-        HashSet<Note> noteSet = new HashSet<>();
+        HashSet<TravelNote> travelNoteSet = new HashSet<>();
         HashSet<Wallet> walletSet = new HashSet<>();
         HashSet<Installment> installmentSet = new HashSet<>();
         Renegotiation renegotiation = new Renegotiation();
         DueDate dueDate = new DueDate("Test id", 20, LocalDateTime.now());
         Proposal proposal = new Proposal();
 
-        this.creditCard = new CreditCard("42", createdAt, "Name", blockedSet, noteSet, walletSet,
+        this.creditCard = new CreditCard("42", createdAt, "Name", blockedSet, travelNoteSet, walletSet,
                 installmentSet, 1, renegotiation, dueDate, proposal, CreditCardStatus.ATIVO);
 
         // Create BiometricImage

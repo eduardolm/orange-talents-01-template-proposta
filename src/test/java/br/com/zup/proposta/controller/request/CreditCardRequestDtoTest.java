@@ -60,6 +60,7 @@ public class CreditCardRequestDtoTest {
     public void rollbackDatabase() {
         proposalRepository.deleteAll();
     }
+
     @Test
     public void testConstructor() {
         CreditCardRequestDto actualCreditCardRequestDto = new CreditCardRequestDto(new Proposal());
