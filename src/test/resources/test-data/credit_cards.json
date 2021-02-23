@@ -1,0 +1,36 @@
+[
+  {
+    "id": "8619-8673-3201-9953",
+    "emitidoEm": "2021-02-16T19:46:41.346535",
+    "titular": "Daniela Silva Mattos",
+    "bloqueios": [],
+    "avisos": [],
+    "carteiras": [],
+    "parcelas": [],
+    "limite": 4452,
+    "renegociacao": null,
+    "vencimento": {
+      "id": "b2a77d4f-1e15-4287-b66c-552172705a27",
+      "dia": 30,
+      "dataDeCriacao": "2021-02-16T19:46:41.346588"
+    },
+    "idProposta": 1
+  },
+  {
+    "id": "8585-9063-7894-1090",
+    "emitidoEm": "2021-02-16T19:34:53.355407",
+    "titular": "José Santos",
+    "bloqueios": [],
+    "avisos": [],
+    "carteiras": [],
+    "parcelas": [],
+    "limite": 4562,
+    "renegociacao": null,
+    "vencimento": {
+      "id": "4fd80585-d074-41da-a0f0-76366d43a89f",
+      "dia": 30,
+      "dataDeCriacao": "2021-02-16T19:34:53.355454"
+    },
+    "idProposta": 2
+  }
+]
