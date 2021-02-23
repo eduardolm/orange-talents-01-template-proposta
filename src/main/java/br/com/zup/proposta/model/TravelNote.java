@@ -79,7 +79,6 @@ public class TravelNote {
                 ", createdAt=" + createdAt +
                 ", clientIp='" + clientIp + '\'' +
                 ", userAgent='" + userAgent + '\'' +
-                ", creditCard=" + creditCard == null ? "0" : creditCard.getId() +
                 '}';
     }
 
@@ -94,14 +93,17 @@ public class TravelNote {
             return false;
         if (getValidUntil() != null ? !getValidUntil().equals(that.getValidUntil()) : that.getValidUntil() != null)
             return false;
-        return getCreditCard() != null ? getCreditCard().equals(that.getCreditCard()) : that.getCreditCard() == null;
+        if (getClientIp() != null ? !getClientIp().equals(that.getClientIp()) : that.getClientIp() != null)
+            return false;
+        return getUserAgent() != null ? getUserAgent().equals(that.getUserAgent()) : that.getUserAgent() == null;
     }
 
     @Override
     public int hashCode() {
         int result = getDestination() != null ? getDestination().hashCode() : 0;
         result = 31 * result + (getValidUntil() != null ? getValidUntil().hashCode() : 0);
-        result = 31 * result + (getCreditCard() != null ? getCreditCard().hashCode() : 0);
+        result = 31 * result + (getClientIp() != null ? getClientIp().hashCode() : 0);
+        result = 31 * result + (getUserAgent() != null ? getUserAgent().hashCode() : 0);
         return result;
     }
 }
