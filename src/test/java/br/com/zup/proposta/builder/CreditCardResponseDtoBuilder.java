@@ -13,7 +13,7 @@ public class CreditCardResponseDtoBuilder {
     private LocalDateTime emitidoEm;
     private String titular;
     private Set<Blocked> bloqueios;
-    private Set<Note> avisos;
+    private Set<TravelNote> avisos;
     private Set<Wallet> carteiras;
     private Set<Installment> parcelas;
     private int limite;
@@ -41,7 +41,7 @@ public class CreditCardResponseDtoBuilder {
         return this;
     }
 
-    public CreditCardResponseDtoBuilder withAvisos(Set<Note> avisos) {
+    public CreditCardResponseDtoBuilder withAvisos(Set<TravelNote> avisos) {
         this.avisos = avisos;
         return this;
     }

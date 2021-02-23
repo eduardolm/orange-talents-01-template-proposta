@@ -2,31 +2,33 @@ package br.com.zup.proposta.service;
 
 import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
 import br.com.zup.proposta.controller.request.CreditCardStatusRequestDto;
+import br.com.zup.proposta.controller.request.TravelNoteRequestDto;
 import br.com.zup.proposta.controller.response.CreditCardResponseDto;
 import br.com.zup.proposta.controller.response.CreditCardStatusResponseDto;
 import br.com.zup.proposta.controller.response.LegacyCreditCardResponseDto;
+import br.com.zup.proposta.controller.response.TravelNoteResponseDto;
 import br.com.zup.proposta.dto.CreditCardDetailsDto;
 import br.com.zup.proposta.enums.CreditCardStatus;
 import br.com.zup.proposta.enums.Status;
 import br.com.zup.proposta.helper.ProposalHelper;
-import br.com.zup.proposta.model.BiometryImage;
-import br.com.zup.proposta.model.Blocked;
-import br.com.zup.proposta.model.CreditCard;
-import br.com.zup.proposta.model.Proposal;
+import br.com.zup.proposta.model.*;
 import br.com.zup.proposta.repository.BlockedRepository;
 import br.com.zup.proposta.repository.CreditCardRepository;
 import br.com.zup.proposta.repository.ProposalRepository;
+import br.com.zup.proposta.repository.TravelNoteRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +36,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -62,7 +67,13 @@ public class CreditCardService {
     private BlockedRepository blockedRepository;
 
     @Autowired
+    private TravelNoteRepository travelNoteRepository;
+
+    @Autowired
     private BlockCreditCard blockCreditCard;
+
+    @Autowired
+    private TravelNoteComm travelNoteComm;
 
     @Autowired
     TransactionTemplate transactionTemplate;
@@ -165,7 +176,8 @@ public class CreditCardService {
         }
 
         LOGGER.info("Bloqueando cartão...");
-        String responsibleSystem = getRemoteInfo(request);
+        List<String> remoteProperties = getRemoteInfo(request);
+        String responsibleSystem = remoteProperties.get(0) + "- " + remoteProperties.get(1);
 
         Blocked blocked = new Blocked(responsibleSystem, true, creditCard);
 
@@ -205,13 +217,36 @@ public class CreditCardService {
         return uploadedImage;
     }
 
-    private String getRemoteInfo(HttpServletRequest request) {
-        String userAgent = request.getHeader("User-Agent");
-        String remoteAddr = request.getRemoteAddr();
-        Map<String, String> result = new HashMap<>();
-        result.put("User-Agent", userAgent);
-        result.put("Remote_Addr", remoteAddr);
+    private List<String> getRemoteInfo(HttpServletRequest request) {
+        List<String> remoteInfoList = new ArrayList<>();
+        remoteInfoList.add(request.getHeader("User-Agent"));
+        remoteInfoList.add(request.getRemoteAddr());
 
-        return result.get("User-Agent") + " - " + result.get("Remote_Addr");
+        return remoteInfoList;
+    }
+
+    public CreditCard addTravelNote(CreditCard creditCard, TravelNoteRequestDto travelNoteRequestDto,
+                                    HttpServletRequest request) {
+
+        List<String> remoteProperties = getRemoteInfo(request);
+        TravelNote travelNote = new TravelNote(travelNoteRequestDto, creditCard, remoteProperties);
+        if (travelNote.equals(travelNoteRepository.findByCreditCard_Id(creditCard.getId()))) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aviso de viagem já cadastrado.");
+        }
+
+        try {
+            TravelNoteResponseDto responseDto = travelNoteComm.communicateTravelNote(creditCard.getId(),
+                    travelNoteRequestDto);
+
+            if (responseDto.getResultado().equals("CRIADO")) {
+                travelNoteRepository.save(travelNote);
+                creditCard.addTravelNote(travelNote);
+                return creditCard;
+            }
+        }
+        catch (FeignException.UnprocessableEntity ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Aviso de viagem já cadastrado.");
+        }
+        return null;
     }
 }

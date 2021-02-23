@@ -24,14 +24,14 @@ public class BiometryImageDetailsDtoTest {
     public void testConstructor2() {
         LocalDateTime createdAt = LocalDateTime.of(1, 1, 1, 1, 1);
         HashSet<Blocked> blockedSet = new HashSet<>();
-        HashSet<Note> notes = new HashSet<>();
+        HashSet<TravelNote> travelNotes = new HashSet<>();
         HashSet<Wallet> wallets = new HashSet<>();
         HashSet<Installment> installments = new HashSet<>();
         Renegotiation renegotiation = new Renegotiation();
         DueDate dueDate = new DueDate();
 
         BiometryImageDetailsDto actualBiometryImageDetailsDto = new BiometryImageDetailsDto(
-                new BiometryImage(new CreditCard("42", createdAt, "Name", blockedSet, notes, wallets, installments, 1,
+                new BiometryImage(new CreditCard("42", createdAt, "Name", blockedSet, travelNotes, wallets, installments, 1,
                         renegotiation, dueDate, new Proposal(), CreditCardStatus.ATIVO), "Image File", "foo.txt"));
 
         assertNull(actualBiometryImageDetailsDto.getId());

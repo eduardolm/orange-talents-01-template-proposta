@@ -11,7 +11,7 @@ public class LegacyCreditCardResponseDto {
     private LocalDateTime emitidoEm;
     private String titular;
     private List<Blocked> bloqueios;
-    private List<Note> avisos;
+    private List<TravelNote> avisos;
     private List<Wallet> carteiras;
     private List<Installment> parcelas;
     private int limite;
@@ -20,7 +20,7 @@ public class LegacyCreditCardResponseDto {
     private String idProposta;
 
     public LegacyCreditCardResponseDto(String id, LocalDateTime emitidoEm, String titular, List<Blocked> bloqueios,
-                                       List<Note> avisos, List<Wallet> carteiras, List<Installment> parcelas,
+                                       List<TravelNote> avisos, List<Wallet> carteiras, List<Installment> parcelas,
                                        int limite, Renegotiation renegociacao, DueDate vencimento, String idProposta) {
 
         this.id = id;
@@ -52,7 +52,7 @@ public class LegacyCreditCardResponseDto {
         return bloqueios;
     }
 
-    public List<Note> getAvisos() {
+    public List<TravelNote> getAvisos() {
         return avisos;
     }
 
