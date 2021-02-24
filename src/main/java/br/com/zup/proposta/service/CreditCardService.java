@@ -165,9 +165,8 @@ public class CreditCardService {
         return null;
     }
 
-
-
     public CreditCard block(CreditCard creditCard, HttpServletRequest request) {
+
         if (checkIfCardIsAlreadyBlocked(creditCard)) {
             LOGGER.warn("Cartão já se encontra bloqueado.");
             return null;
@@ -209,6 +208,7 @@ public class CreditCardService {
     }
 
     public BiometryImage addBiometry(BiometryImageRequestDto requestDto, CreditCard creditCard) throws Exception {
+
         BiometryImage uploadedImage = biometricService.uploadImage(requestDto, creditCard);
         Assert.notNull(uploadedImage, "Biometria já cadastrada.");
 
@@ -260,6 +260,7 @@ public class CreditCardService {
     public CreditCard addDigitalWallet(CreditCard creditCard, WalletRequestDto requestDto) {
 
         try {
+
             WalletResponseDto responseDto = fetchCreditCard.addWallet(creditCard.getId(), requestDto);
 
             if (responseDto.getResultado().equals("ASSOCIADA")) {
