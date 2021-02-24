@@ -8,6 +8,8 @@ import br.com.zup.proposta.handler.ObjectHandler;
 import br.com.zup.proposta.model.BiometryImage;
 import br.com.zup.proposta.model.CreditCard;
 import br.com.zup.proposta.service.CreditCardService;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +32,21 @@ public class CreditCardController extends ObjectHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreditCardController.class);
 
+    private final Tracer tracer;
+
+    public CreditCardController(Tracer tracer) {
+        this.tracer = tracer;
+    }
+
     @PostMapping("{id}/images")
     public ResponseEntity<?> upload(@PathVariable("id") String id,
                                     @Valid BiometryImageRequestDto requestDto,
                                     UriComponentsBuilder uriBuilder) throws Exception {
 
         LOGGER.info("Iniciando upload de biometria....");
+        Span activeSpan = tracer.activeSpan();
+        activeSpan.setTag("tag.creditcard.action", "Upload biometrics");
+
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard == null) return ResponseEntity.notFound().build();
 
@@ -49,6 +60,9 @@ public class CreditCardController extends ObjectHandler {
     @GetMapping("{id}")
     public ResponseEntity<?> findById(@PathVariable("id") String id) {
         LOGGER.info("Retornando cartão...");
+        Span activeSpan = tracer.activeSpan();
+        activeSpan.setTag("tag.creditcard.action", "Find Creditcard by id");
+
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(new CreditCardDetailsDto(creditCard));
@@ -61,6 +75,8 @@ public class CreditCardController extends ObjectHandler {
                                    HttpServletRequest request) {
 
         LOGGER.info("Iniciando bloqueio do cartão...");
+        Span activeSpan = tracer.activeSpan();
+        activeSpan.setTag("tag.creditcard.action", "Block creditcard");
 
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard ==  null) {
@@ -82,6 +98,8 @@ public class CreditCardController extends ObjectHandler {
                                               HttpServletRequest request) {
 
         LOGGER.info("Cadastrando aviso de viagem...");
+        Span activeSpan = tracer.activeSpan();
+        activeSpan.setTag("tag.creditcard.action", "Communicate travel note");
 
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard ==  null) {
@@ -103,17 +121,22 @@ public class CreditCardController extends ObjectHandler {
                                               UriComponentsBuilder uriBuilder) {
 
         LOGGER.info("Cadastrando carteira digital...");
+        Span activeSpan = tracer.activeSpan();
+        activeSpan.setTag("tag.creditcard.action", "Add digital wallet");
 
         CreditCard creditCard = checkCreditCardExists(id);
         if (creditCard ==  null) {
+            LOGGER.error("Cartão não encontrado.");
             return ResponseEntity.notFound().build();
         }
 
         CreditCard walletCard = creditCardService.addDigitalWallet(creditCard, requestDto);
         ResponseEntity<?> response = creditCardService.checkForNull(walletCard, "Carteira já cadastrada.");
+        LOGGER.error("Carteira já cadastrada.");
         if (response != null) return response;
 
         URI location = creditCardService.buildUri(id, uriBuilder, walletCard);
+        LOGGER.info("Carteira adicionada com sucesso.");
         return ResponseEntity.created(location).body(new CreditCardDetailsDto(walletCard));
     }
 }
