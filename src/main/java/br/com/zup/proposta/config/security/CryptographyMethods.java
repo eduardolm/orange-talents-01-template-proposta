@@ -11,9 +11,6 @@ import java.util.Base64;
 @Component
 public class CryptographyMethods{
 
-//    @Autowired
-//    private EnvironmentProperties env;
-
     @Value("${crypto.secret.key}")
     private String secretKey;
 
