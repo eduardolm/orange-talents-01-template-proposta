@@ -32,7 +32,7 @@ public class BiometricService {
             MultipartFile image = requestDto.getImage();
             File file = fileService.convertMultiPartToFile(image);
 
-            if (preventRepeatedImages(file)) return null;
+            if (preventRepeatedImages(file, creditCard)) return null;
 
             // file -> byte[] -> base64 -> hash
             String imageFile = fileService.convertToBase64(fileService.readBytesFromFile(file));
@@ -55,10 +55,10 @@ public class BiometricService {
         return null;
     }
 
-    public boolean preventRepeatedImages(File file) {
+    public boolean preventRepeatedImages(File file, CreditCard creditCard) {
         Optional<BiometryImage> image = imageRepository.findByOriginalFileName(file.getName());
 
-        if (image.isPresent()) {
+        if (image.isPresent() && creditCard.getImages().contains(image)) {
             String originalName = image.get().getOriginalFileName();
             return originalName.equals(file.getName());
         }

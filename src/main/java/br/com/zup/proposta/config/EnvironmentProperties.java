@@ -22,6 +22,6 @@ public class EnvironmentProperties implements EnvironmentAware {
     @Bean
     public String load(String propertyName)
     {
-        return environment.getRequiredProperty(propertyName);
+        return environment.getProperty(propertyName);
     }
 }

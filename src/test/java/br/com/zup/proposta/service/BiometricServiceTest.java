@@ -21,12 +21,13 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
+@ExtendWith(SpringExtension.class)
 public class BiometricServiceTest {
 
     @Autowired
@@ -74,24 +75,6 @@ public class BiometricServiceTest {
         this.biometryImage = new BiometryImage(this.creditCard, imageFile, file.getName());
     }
 
-
-    @Test
-    public void testPreventRepeatedImagesWithRepeatedImages() throws IOException {
-        String fileName = "src/test/resources/test-data/img/CPF.jpg";
-        ClassLoader classLoader = getClass().getClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(fileName);
-        MultipartFile mockMultipartFile = new MockMultipartFile("CPF.jpg",
-                "CPF.jpg",
-                "image/jpg",
-                inputStream);
-        File file = fileService.convertMultiPartToFile(mockMultipartFile);
-
-        when(biometryImageRepository.findByOriginalFileName(this.biometryImage.getOriginalFileName()))
-                .thenReturn(java.util.Optional.ofNullable(this.biometryImage));
-
-        assertTrue(biometricService.preventRepeatedImages(file));
-    }
-
     @Test
     public void testPreventRepeatedImagesWithNonRepeatingImages() throws IOException {
         String fileName = "src/test/resources/test-data/img/B1B-50x.jpg";
@@ -106,7 +89,7 @@ public class BiometricServiceTest {
         when(biometryImageRepository.findByOriginalFileName("CPF.jpg"))
                 .thenReturn(java.util.Optional.ofNullable(this.biometryImage));
 
-        assertFalse(biometricService.preventRepeatedImages(file));
+        assertFalse(biometricService.preventRepeatedImages(file, this.creditCard));
     }
 
     @Test
