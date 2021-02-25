@@ -11,12 +11,9 @@ import br.com.zup.proposta.repository.ProposalRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,8 +21,6 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@AutoConfigureMockMvc
-@ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class CreditCardResponseDtoTest {
 
@@ -37,13 +32,10 @@ public class CreditCardResponseDtoTest {
 
     @Test
     public void testSetStatus() {
-        // Arrange
         CreditCardResponseDto creditCardResponseDto = new CreditCardResponseDto();
 
-        // Act
         creditCardResponseDto.setStatus(CreditCardStatus.ATIVO);
 
-        // Assert
         assertEquals(CreditCardStatus.ATIVO, creditCardResponseDto.getStatus());
     }
 

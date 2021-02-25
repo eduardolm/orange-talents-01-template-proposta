@@ -2,7 +2,6 @@ package br.com.zup.proposta.service;
 
 import br.com.zup.proposta.builder.AddressRequestDtoBuilder;
 import br.com.zup.proposta.builder.ProposalRequestDtoBuilder;
-import br.com.zup.proposta.config.WireMockConfig;
 import br.com.zup.proposta.controller.request.AddressRequestDto;
 import br.com.zup.proposta.controller.request.ProposalRequestDto;
 import br.com.zup.proposta.controller.request.StatusRequestDto;
@@ -17,10 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -31,10 +29,9 @@ import static br.com.zup.proposta.config.AnalysisClientMocks.setupAnalysisClient
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
-@EnableConfigurationProperties
+@AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { WireMockConfig.class })
+@ActiveProfiles("test")
 public class AnalysisClientTest {
 
     @Autowired
@@ -55,6 +52,7 @@ public class AnalysisClientTest {
 
     @BeforeEach
     public void setup() throws IOException {
+        this.analysisClientMockService.start();
         // Create address
         AddressRequestDto address = new AddressRequestDtoBuilder()
                 .withStreet("Rua da Bica")
@@ -64,7 +62,6 @@ public class AnalysisClientTest {
                 .build();
 
         this.address = address;
-
 
         // Create proposal
         ProposalRequestDto proposalRequestDto = new ProposalRequestDtoBuilder()
@@ -81,6 +78,7 @@ public class AnalysisClientTest {
     @AfterEach
     public void rollbackDatabase() {
         proposalRepository.deleteAll();
+        this.analysisClientMockService.stop();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package br.com.zup.proposta.model;
 
+import br.com.zup.proposta.config.security.Crypto;
 import br.com.zup.proposta.enums.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,6 +17,7 @@ public class Proposal {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    @Convert(converter = Crypto.class)
     private String document;
 
     @Column(nullable = false)
