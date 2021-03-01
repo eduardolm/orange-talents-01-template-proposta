@@ -38,7 +38,7 @@ public class ValidationErrorHandler {
         List<ObjectError> globalErrors = exception.getBindingResult().getGlobalErrors();
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
 
-        return buildValidationErrors(globalErrors, fieldErrors);
+        return buildBindExceptionValidationError(globalErrors, fieldErrors);
     }
 
     private ValidationErrorsOutputDto buildBindExceptionValidationError(List<ObjectError> globalErrors, List<FieldError> fieldErrors) {
