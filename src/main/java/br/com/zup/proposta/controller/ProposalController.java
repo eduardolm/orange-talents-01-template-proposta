@@ -18,7 +18,6 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/propostas")
@@ -70,12 +69,8 @@ public class ProposalController {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.proposal.action", "Find proposal by id");
 
-        Optional<Proposal> proposal = proposalRepository.findById(id);
-        if (proposal.isPresent()) {
-            return ResponseEntity.ok().body(new ProposalDto(proposal.get()));
-        }
-        else {
-            return ResponseEntity.notFound().build();
-        }
+        return proposalRepository.findById(id)
+                .map(proposal -> ResponseEntity.ok().body(new ProposalDto(proposal)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

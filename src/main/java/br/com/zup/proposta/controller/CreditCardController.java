@@ -7,6 +7,7 @@ import br.com.zup.proposta.dto.CreditCardDetailsDto;
 import br.com.zup.proposta.handler.ObjectHandler;
 import br.com.zup.proposta.model.BiometryImage;
 import br.com.zup.proposta.model.CreditCard;
+import br.com.zup.proposta.repository.CreditCardRepository;
 import br.com.zup.proposta.service.CreditCardService;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -29,6 +30,9 @@ public class CreditCardController extends ObjectHandler {
 
     @Autowired
     private CreditCardService creditCardService;
+
+    @Autowired
+    private CreditCardRepository creditCardRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreditCardController.class);
 
@@ -63,9 +67,9 @@ public class CreditCardController extends ObjectHandler {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.creditcard.action", "Find Creditcard by id");
 
-        CreditCard creditCard = checkCreditCardExists(id);
-        if (creditCard == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok().body(new CreditCardDetailsDto(creditCard));
+        return creditCardRepository.findById(id)
+                .map(creditCard -> ResponseEntity.ok().body(new CreditCardDetailsDto(creditCard)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/bloqueios")
