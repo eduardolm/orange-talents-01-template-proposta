@@ -4,7 +4,6 @@ import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
 import br.com.zup.proposta.enums.CreditCardStatus;
 import br.com.zup.proposta.model.*;
 import br.com.zup.proposta.repository.CreditCardRepository;
-import br.com.zup.proposta.service.BiometricService;
 import br.com.zup.proposta.service.FileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -48,9 +46,6 @@ public class CreditCardControllerTest {
 
     @Autowired
     private FileService fileService;
-
-    @MockBean
-    private BiometricService biometricService;
 
     @Autowired
     private WebApplicationContext wContext;
@@ -72,8 +67,10 @@ public class CreditCardControllerTest {
         DueDate dueDate = new DueDate("Test id", 20, LocalDateTime.now());
         Proposal proposal = new Proposal();
 
-        this.creditCard = new CreditCard("42", createdAt, "Name", blockedSet, travelNoteSet, walletSet,
+        this.creditCard = new CreditCard("9691-6349-3129-9350", createdAt, "Name", blockedSet, travelNoteSet, walletSet,
                 installmentSet, 1, renegotiation, dueDate, proposal, CreditCardStatus.ATIVO);
+        when(creditCardRepository.save(this.creditCard)).thenReturn(this.creditCard);
+        creditCardRepository.save(creditCard);
 
         // Create BiometricImage
         String fileName = "src/test/resources/test-data/img/CPF.jpg";
@@ -90,18 +87,6 @@ public class CreditCardControllerTest {
         String imageFile = fileService.convertToBase64(fileService.readBytesFromFile(file));
 
         this.biometryImage = new BiometryImage(this.creditCard, imageFile, file.getName());
-    }
-
-    @Test
-    public void testUploadImage() throws Exception {
-        when(biometricService.uploadImage(biometryImageRequestDto, creditCard)).thenReturn(this.biometryImage);
-
-        MockMvcBuilders.webAppContextSetup(wContext).build();
-
-        mockMvc.perform(multipart("/api/cartoes/9691-6349-3129-9350/images").file("images",
-                this.mockMultipartFile.getBytes())
-                .characterEncoding("UTF-8"))
-                .andExpect(status().isOk());
     }
 
     @Test

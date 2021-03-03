@@ -86,7 +86,7 @@ public class BiometricServiceTest {
                 inputStream);
         File file = fileService.convertMultiPartToFile(mockMultipartFile);
 
-        when(biometryImageRepository.findByOriginalFileName("CPF.jpg"))
+        when(biometryImageRepository.findByOriginalFileNameAndCreditCard_Id("CPF.jpg", this.creditCard.getId()))
                 .thenReturn(java.util.Optional.ofNullable(this.biometryImage));
 
         assertFalse(biometricService.preventRepeatedImages(file, this.creditCard));

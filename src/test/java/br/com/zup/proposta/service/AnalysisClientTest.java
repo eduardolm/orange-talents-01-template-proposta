@@ -15,8 +15,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -26,17 +28,17 @@ import java.math.BigDecimal;
 import static br.com.zup.proposta.config.AnalysisClientMocks.setupAnalysisClientResponseComRestricao;
 import static br.com.zup.proposta.config.AnalysisClientMocks.setupAnalysisClientResponseSemRestricao;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class AnalysisClientTest {
 
-    @Autowired
+    @MockBean
     private ProposalRepository proposalRepository;
 
-    @Autowired
-    private WireMockServer analysisClientMockService;
+    private WireMockServer analysisClientMockService = new WireMockServer();
 
     @Autowired
     private AnalysisClient analysisClient;
@@ -71,11 +73,12 @@ public class AnalysisClientTest {
                 .build();
 
         this.proposalRequest = proposalRequestDto;
+
+        when(proposalRepository.save(Mockito.any())).thenReturn(this.proposalRequest.toModel());
     }
 
     @AfterEach
     public void rollbackDatabase() {
-        proposalRepository.deleteAll();
         this.analysisClientMockService.stop();
     }
 
