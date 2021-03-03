@@ -12,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Configuration
 @EnableWebSecurity
 public class SecurityTestConfig extends WebSecurityConfigurerAdapter {
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().antMatchers("/**").permitAll();
@@ -35,5 +36,4 @@ public class SecurityTestConfig extends WebSecurityConfigurerAdapter {
         return accessToken;
 
     }
-
 }

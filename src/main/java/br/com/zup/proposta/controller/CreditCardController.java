@@ -5,10 +5,14 @@ import br.com.zup.proposta.controller.request.TravelNoteRequestDto;
 import br.com.zup.proposta.controller.request.WalletRequestDto;
 import br.com.zup.proposta.dto.CreditCardDetailsDto;
 import br.com.zup.proposta.handler.ObjectHandler;
+import br.com.zup.proposta.helper.HttpHelper;
 import br.com.zup.proposta.model.BiometryImage;
 import br.com.zup.proposta.model.CreditCard;
 import br.com.zup.proposta.repository.CreditCardRepository;
+import br.com.zup.proposta.service.BlockedService;
 import br.com.zup.proposta.service.CreditCardService;
+import br.com.zup.proposta.service.TravelNoteService;
+import br.com.zup.proposta.service.WalletService;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.slf4j.Logger;
@@ -21,7 +25,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.websocket.server.PathParam;
 import java.net.URI;
 
 @RestController
@@ -30,6 +33,18 @@ public class CreditCardController extends ObjectHandler {
 
     @Autowired
     private CreditCardService creditCardService;
+
+    @Autowired
+    private WalletService walletService;
+
+    @Autowired
+    private BlockedService blockedService;
+
+    @Autowired
+    private TravelNoteService travelNoteService;
+
+    @Autowired
+    private HttpHelper httpHelper;
 
     @Autowired
     private CreditCardRepository creditCardRepository;
@@ -42,7 +57,7 @@ public class CreditCardController extends ObjectHandler {
         this.tracer = tracer;
     }
 
-    @PostMapping("{id}/images")
+    @PostMapping("/{id}/images")
     public ResponseEntity<?> upload(@PathVariable("id") String id,
                                     @Valid BiometryImageRequestDto requestDto,
                                     UriComponentsBuilder uriBuilder) throws Exception {
@@ -55,13 +70,13 @@ public class CreditCardController extends ObjectHandler {
         if (creditCard == null) return ResponseEntity.notFound().build();
 
         BiometryImage uploadedBiometric = creditCardService.addBiometry(requestDto, creditCard);
-        URI location = creditCardService.buildUri(id, uriBuilder, uploadedBiometric);
+        URI location = httpHelper.buildUri(id, uriBuilder, uploadedBiometric);
 
         LOGGER.info("Biometria cadastrada com sucesso: " + uploadedBiometric.toString());
         return ResponseEntity.created(location).build();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable("id") String id) {
         LOGGER.info("Retornando cartão...");
         Span activeSpan = tracer.activeSpan();
@@ -72,8 +87,8 @@ public class CreditCardController extends ObjectHandler {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/bloqueios")
-    public ResponseEntity<?> block(@PathParam("id")
+    @PostMapping("/bloqueios/{id}")
+    public ResponseEntity<?> block(@PathVariable("id")
                                    @Valid
                                    @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
                                    HttpServletRequest request) {
@@ -87,15 +102,15 @@ public class CreditCardController extends ObjectHandler {
             return ResponseEntity.notFound().build();
         }
 
-        CreditCard blockedCard = creditCardService.block(creditCard, request);
+        CreditCard blockedCard = blockedService.block(creditCard, request);
         ResponseEntity<?> response = creditCardService.checkForNull(blockedCard, "Cartão já bloqueado.");
         if (response != null) return response;
 
         return ResponseEntity.ok().body(new CreditCardDetailsDto(blockedCard));
     }
 
-    @PostMapping("/viagens")
-    public ResponseEntity<?> createTravelNote(@PathParam("id")
+    @PostMapping("/viagens/{id}")
+    public ResponseEntity<?> createTravelNote(@PathVariable("id")
                                               @Valid
                                               @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
                                               @RequestBody @Valid TravelNoteRequestDto travelNoteRequestDto,
@@ -110,15 +125,15 @@ public class CreditCardController extends ObjectHandler {
             return ResponseEntity.notFound().build();
         }
 
-        CreditCard travelNoteCard = creditCardService.addTravelNote(creditCard, travelNoteRequestDto, request);
+        CreditCard travelNoteCard = travelNoteService.addTravelNote(creditCard, travelNoteRequestDto, request);
         ResponseEntity<?> response = creditCardService.checkForNull(travelNoteCard, "Aviso de viagem já cadastrado.");
         if (response != null) return response;
 
         return ResponseEntity.ok().body(new CreditCardDetailsDto(travelNoteCard));
     }
 
-    @PostMapping("/carteiras")
-    public ResponseEntity<?> addDigitalWallet(@PathParam("id")
+    @PostMapping("/carteiras/{id}")
+    public ResponseEntity<?> addDigitalWallet(@PathVariable("id")
                                               @Valid
                                               @NotBlank(message = "Obrigatório informar o número do cartão.") String id,
                                               @RequestBody @Valid WalletRequestDto requestDto,
@@ -134,12 +149,12 @@ public class CreditCardController extends ObjectHandler {
             return ResponseEntity.notFound().build();
         }
 
-        CreditCard walletCard = creditCardService.addDigitalWallet(creditCard, requestDto);
+        CreditCard walletCard = walletService.addDigitalWallet(creditCard, requestDto);
         ResponseEntity<?> response = creditCardService.checkForNull(walletCard, "Carteira já cadastrada.");
         LOGGER.error("Carteira já cadastrada.");
         if (response != null) return response;
 
-        URI location = creditCardService.buildUri(id, uriBuilder, walletCard);
+        URI location = httpHelper.buildUri(id, uriBuilder, walletCard);
         LOGGER.info("Carteira adicionada com sucesso.");
         return ResponseEntity.created(location).body(new CreditCardDetailsDto(walletCard));
     }

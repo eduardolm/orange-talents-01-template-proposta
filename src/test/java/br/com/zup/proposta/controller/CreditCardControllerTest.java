@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ExtendWith(SpringExtension.class)
@@ -52,9 +51,6 @@ public class CreditCardControllerTest {
 
     @MockBean
     private BiometricService biometricService;
-
-    @MockBean
-    private CreditCardController controller;
 
     @Autowired
     private WebApplicationContext wContext;

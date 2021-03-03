@@ -62,7 +62,7 @@ public class ProposalController {
         return ResponseEntity.created(location).body(new ProposalDto(proposal));
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable("id") Long id) {
 
         LOGGER.info("Recuperando proposta...");
