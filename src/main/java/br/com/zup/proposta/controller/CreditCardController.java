@@ -4,7 +4,6 @@ import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
 import br.com.zup.proposta.controller.request.TravelNoteRequestDto;
 import br.com.zup.proposta.controller.request.WalletRequestDto;
 import br.com.zup.proposta.dto.CreditCardDetailsDto;
-import br.com.zup.proposta.handler.ObjectHandler;
 import br.com.zup.proposta.helper.HttpHelper;
 import br.com.zup.proposta.model.BiometryImage;
 import br.com.zup.proposta.model.CreditCard;
@@ -29,7 +28,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/api/cartoes")
-public class CreditCardController extends ObjectHandler {
+public class CreditCardController {
 
     @Autowired
     private CreditCardService creditCardService;
@@ -66,7 +65,7 @@ public class CreditCardController extends ObjectHandler {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.creditcard.action", "Upload biometrics");
 
-        CreditCard creditCard = checkCreditCardExists(id);
+        CreditCard creditCard = creditCardService.checkCreditCardExists(id);
         if (creditCard == null) return ResponseEntity.notFound().build();
 
         BiometryImage uploadedBiometric = creditCardService.addBiometry(requestDto, creditCard);
@@ -97,7 +96,7 @@ public class CreditCardController extends ObjectHandler {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.creditcard.action", "Block creditcard");
 
-        CreditCard creditCard = checkCreditCardExists(id);
+        CreditCard creditCard = creditCardService.checkCreditCardExists(id);
         if (creditCard ==  null) {
             return ResponseEntity.notFound().build();
         }
@@ -120,7 +119,7 @@ public class CreditCardController extends ObjectHandler {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.creditcard.action", "Communicate travel note");
 
-        CreditCard creditCard = checkCreditCardExists(id);
+        CreditCard creditCard = creditCardService.checkCreditCardExists(id);
         if (creditCard ==  null) {
             return ResponseEntity.notFound().build();
         }
@@ -143,7 +142,7 @@ public class CreditCardController extends ObjectHandler {
         Span activeSpan = tracer.activeSpan();
         activeSpan.setTag("tag.creditcard.action", "Add digital wallet");
 
-        CreditCard creditCard = checkCreditCardExists(id);
+        CreditCard creditCard = creditCardService.checkCreditCardExists(id);
         if (creditCard ==  null) {
             LOGGER.error("Cartão não encontrado.");
             return ResponseEntity.notFound().build();
