@@ -214,4 +214,14 @@ public class CreditCard {
     public void addWallet(Wallet wallet) {
         this.wallets.add(wallet);
     }
+
+    public boolean checkIfCardIsAlreadyBlocked() {
+        Blocked blocked = new Blocked(null, false, null);
+        LocalDateTime latestDate = LocalDateTime.MIN;
+        for (Blocked blockedCard : this.getBlockedSet()) {
+            if (blockedCard.isActive() && blockedCard.getBlockedAt().isAfter(latestDate)) blocked = blockedCard;
+            latestDate = blockedCard.getBlockedAt();
+        }
+        return blocked.getCreditCard() != null;
+    }
 }

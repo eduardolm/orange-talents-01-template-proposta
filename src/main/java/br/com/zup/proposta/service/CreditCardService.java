@@ -1,19 +1,17 @@
 package br.com.zup.proposta.service;
 
 import br.com.zup.proposta.controller.request.BiometryImageRequestDto;
-import br.com.zup.proposta.controller.request.CreditCardStatusRequestDto;
-import br.com.zup.proposta.controller.request.TravelNoteRequestDto;
-import br.com.zup.proposta.controller.request.WalletRequestDto;
-import br.com.zup.proposta.controller.response.*;
-import br.com.zup.proposta.dto.CreditCardDetailsDto;
+import br.com.zup.proposta.controller.response.CreditCardResponseDto;
 import br.com.zup.proposta.enums.CreditCardStatus;
 import br.com.zup.proposta.enums.Status;
 import br.com.zup.proposta.helper.ProposalHelper;
-import br.com.zup.proposta.model.*;
-import br.com.zup.proposta.repository.*;
+import br.com.zup.proposta.model.BiometryImage;
+import br.com.zup.proposta.model.CreditCard;
+import br.com.zup.proposta.model.Proposal;
+import br.com.zup.proposta.repository.CreditCardRepository;
+import br.com.zup.proposta.repository.ProposalRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,19 +43,10 @@ public class CreditCardService {
     private ObjectMapper mapper;
 
     @Autowired
-    private BiometricService biometricService;
-
-    @Autowired
     private ProposalHelper proposalHelper;
 
     @Autowired
-    private BlockedRepository blockedRepository;
-
-    @Autowired
-    private TravelNoteRepository travelNoteRepository;
-
-    @Autowired
-    private WalletRepository walletRepository;
+    private BiometricService biometricService;
 
     @Autowired
     TransactionTemplate transactionTemplate;
@@ -112,6 +97,7 @@ public class CreditCardService {
     }
 
     private List<CreditCardResponseDto> createCreditCards() {
+
         LOGGER.info("Chamando API para buscar novos cartões.....");
 
         try {
@@ -129,8 +115,7 @@ public class CreditCardService {
                 LOGGER.info("Retornando lista de cartões criados.... {}", newList);
                 return newList;
             }
-        }
-        catch (JsonProcessingException | feign.RetryableException ex) {
+        } catch (JsonProcessingException | feign.RetryableException ex) {
             LOGGER.warn(ex.getMessage());
             return null;
         } catch (IOException e) {
@@ -142,6 +127,7 @@ public class CreditCardService {
     }
 
     private List<CreditCardResponseDto> avoidCardsWithoutProposalId(List<CreditCardResponseDto> creditCardList) {
+
         List<CreditCardResponseDto> newList = new ArrayList<>();
         for (CreditCardResponseDto card : creditCardList) {
             if (card.getIdProposta() != null && !creditCardRepository.existsById(card.getId())) {
@@ -149,62 +135,6 @@ public class CreditCardService {
             }
         }
         return newList;
-    }
-
-    public <T> URI buildUri(String id, UriComponentsBuilder uriBuilder, T item) {
-        if (item.getClass().equals(BiometryImage.class)) {
-            return uriBuilder
-                    .path("/api/cartoes/{id}/images/{imageId}")
-                    .buildAndExpand(id, ((BiometryImage) item).getId()).toUri();
-        }
-        if (item.getClass().equals(Wallet.class)) {
-            return uriBuilder
-                    .path("/api/cartoes/{id}/carteiras/{walletId}")
-                    .buildAndExpand(id, ((Wallet) item).getId()).toUri();
-        }
-        return null;
-    }
-
-    public CreditCard block(CreditCard creditCard, HttpServletRequest request) {
-
-        if (checkIfCardIsAlreadyBlocked(creditCard)) {
-            LOGGER.warn("Cartão já se encontra bloqueado.");
-            return null;
-        }
-
-        LOGGER.info("Bloqueando cartão...");
-        List<String> remoteProperties = getRemoteInfo(request);
-        String responsibleSystem = remoteProperties.get(0) + "- " + remoteProperties.get(1);
-
-        Blocked blocked = new Blocked(responsibleSystem, true, creditCard);
-
-        try {
-            CreditCardStatusResponseDto newStatus = fetchCreditCard.blockCard(creditCard.getId(),
-                    new CreditCardStatusRequestDto(responsibleSystem));
-
-            LegacyCreditCardResponseDto legacyResponse = fetchCreditCard.findById(creditCard.getId());
-
-            if (newStatus.getResultado().equals("BLOQUEADO") && !legacyResponse.getBloqueios().isEmpty()) {
-                creditCard.updateStatus(newStatus.getResultado());
-                blocked.setId(legacyResponse.getBloqueios().get(0).getId());
-                blockedRepository.save(blocked);
-                LOGGER.info("Cartão bloqueado: " + new CreditCardDetailsDto(creditCard));
-            }
-        } catch (FeignException ex) {
-            LOGGER.error("Erro ao bloquear o cartão: " + ex);
-        }
-
-        return creditCard;
-    }
-
-    public boolean checkIfCardIsAlreadyBlocked(CreditCard creditCard) {
-        Blocked blocked = new Blocked(null, false, null);
-        LocalDateTime latestDate = LocalDateTime.MIN;
-        for (Blocked blockedCard : creditCard.getBlockedSet()) {
-            if (blockedCard.isActive() && blockedCard.getBlockedAt().isAfter(latestDate)) blocked = blockedCard;
-            latestDate = blockedCard.getBlockedAt();
-        }
-        return blocked.getCreditCard() != null;
     }
 
     public BiometryImage addBiometry(BiometryImageRequestDto requestDto, CreditCard creditCard) throws Exception {
@@ -215,64 +145,12 @@ public class CreditCardService {
         return uploadedImage;
     }
 
-    private List<String> getRemoteInfo(HttpServletRequest request) {
-        List<String> remoteInfoList = new ArrayList<>();
-        remoteInfoList.add(request.getHeader("User-Agent"));
-        remoteInfoList.add(request.getRemoteAddr());
-
-        return remoteInfoList;
-    }
-
-    public CreditCard addTravelNote(CreditCard creditCard, TravelNoteRequestDto travelNoteRequestDto,
-                                    HttpServletRequest request) {
-
-        List<String> remoteProperties = getRemoteInfo(request);
-        TravelNote travelNote = new TravelNote(travelNoteRequestDto, creditCard, remoteProperties);
-        if (travelNote.equals(travelNoteRepository.findByCreditCard_Id(creditCard.getId()))) {
-            return null;
-        }
-
-        try {
-            TravelNoteResponseDto responseDto = fetchCreditCard.communicateTravelNote(creditCard.getId(),
-                    travelNoteRequestDto);
-
-            if (responseDto.getResultado().equals("CRIADO")) {
-                travelNoteRepository.save(travelNote);
-                creditCard.addTravelNote(travelNote);
-                return creditCard;
-            }
-        }
-        catch (FeignException.UnprocessableEntity ex) {
-            return null;
-        }
-        return null;
-    }
-
-    public ResponseEntity<?> checkForNull(CreditCard card, String s) {
-        if (card == null) {
+    public ResponseEntity<?> checkForNull(CreditCard creditCard, String message) {
+        if (creditCard == null) {
             Map<String, String> response = new HashMap<>();
-            response.put("message", s);
+            response.put("message", message);
             return ResponseEntity.unprocessableEntity().body(response);
         }
         return null;
-    }
-
-    public CreditCard addDigitalWallet(CreditCard creditCard, WalletRequestDto requestDto) {
-
-        try {
-
-            WalletResponseDto responseDto = fetchCreditCard.addWallet(creditCard.getId(), requestDto);
-
-            if (responseDto.getResultado().equals("ASSOCIADA")) {
-                Wallet wallet = new Wallet(responseDto.getId(), requestDto, creditCard);
-                walletRepository.save(wallet);
-                creditCard.addWallet(wallet);
-                return creditCard;
-            }
-        }
-        catch (FeignException.UnprocessableEntity ex) {
-            return null;
-        }
-        return  null;
     }
 }

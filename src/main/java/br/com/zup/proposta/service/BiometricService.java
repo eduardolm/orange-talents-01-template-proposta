@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -47,18 +48,21 @@ public class BiometricService {
             return biometryImage;
         }
         catch (IOException ex) {
-            LOGGER.error("Erro ao gravar o arquivo no banco de dados.", ex);
+            if (ex.getMessage().equals("The system cannot find the path specified"))
+                LOGGER.error("Arquivo não encontrado. - " + ex.getLocalizedMessage());
+            throw new NoSuchElementException("É obrigtório informar o arquivo a ser enviado.");
         }
         catch (Exception ex1) {
-            LOGGER.error("Erro desconhecido.", ex1);
+            LOGGER.error("Erro desconhecido.", ex1.getLocalizedMessage());
+            throw new IllegalArgumentException("Biometria já cadastrada.");
         }
-        return null;
+//        return null;
     }
 
     public boolean preventRepeatedImages(File file, CreditCard creditCard) {
-        Optional<BiometryImage> image = imageRepository.findByOriginalFileName(file.getName());
+        Optional<BiometryImage> image = imageRepository.findByOriginalFileNameAndCreditCard_Id(file.getName(), creditCard.getId());
 
-        if (image.isPresent() && creditCard.getImages().contains(image)) {
+        if (image.isPresent()) {
             String originalName = image.get().getOriginalFileName();
             return originalName.equals(file.getName());
         }

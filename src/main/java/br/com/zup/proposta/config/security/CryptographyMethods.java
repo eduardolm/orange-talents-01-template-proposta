@@ -14,7 +14,7 @@ public class CryptographyMethods{
     @Value("${crypto.secret.key}")
     private String secretKey;
 
-    private final String ALGORITHM = "AES/ECB/PKCS5Padding";
+    private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
     private byte[] KEY;
 
     public String convertToDatabaseColumn(String inputValue) {
@@ -41,7 +41,7 @@ public class CryptographyMethods{
         }
     }
 
-    private byte[] convertToByte(String key) {
+    private static byte[] convertToByte(String key) {
         return key.getBytes();
     }
 }

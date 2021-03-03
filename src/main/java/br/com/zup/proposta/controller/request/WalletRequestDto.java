@@ -9,6 +9,7 @@ public class WalletRequestDto {
     @Email(message = "Formato de e-mail inválido.")
     private String email;
 
+    @NotBlank(message = "É obrigatório informar a carteira.")
     private String carteira;
 
     public WalletRequestDto(@NotBlank(message = "E-mail é obrigatório.")

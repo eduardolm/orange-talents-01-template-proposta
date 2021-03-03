@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface BiometryImageRepository extends JpaRepository<BiometryImage, Long> {
 
-    Optional<BiometryImage> findByOriginalFileName(String name);
+    Optional<BiometryImage> findByOriginalFileNameAndCreditCard_Id(String name, String id);
 }

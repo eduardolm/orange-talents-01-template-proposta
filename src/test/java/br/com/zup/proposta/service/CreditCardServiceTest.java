@@ -96,7 +96,7 @@ public class CreditCardServiceTest {
 
     @Test
     public void shouldReturnFalseForUnblockedCreditCard() {
-        assertFalse(creditCardService.checkIfCardIsAlreadyBlocked(this.creditCard));
+        assertFalse(this.creditCard.checkIfCardIsAlreadyBlocked());
     }
 
     @Test
@@ -115,7 +115,7 @@ public class CreditCardServiceTest {
         Blocked blocked = new Blocked("Test", true, creditCard1);
         blockedSet.add(blocked);
 
-        assertTrue(creditCardService.checkIfCardIsAlreadyBlocked(creditCard1));
+        assertTrue(creditCard1.checkIfCardIsAlreadyBlocked());
     }
 
     @Test
