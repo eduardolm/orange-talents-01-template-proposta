@@ -13,7 +13,7 @@ public class BlockedTest {
     public void testConstructor() {
         Blocked blocked = new Blocked("Testing", false, new CreditCard());
 
-        assertEquals(LocalDateTime.now(), blocked.getBlockedAt());
+        assertEquals(LocalDateTime.now().withNano(0), blocked.getBlockedAt().withNano(0));
         assertEquals("Testing", blocked.getResponsibleSystem());
         assertFalse(blocked.isActive());
     }

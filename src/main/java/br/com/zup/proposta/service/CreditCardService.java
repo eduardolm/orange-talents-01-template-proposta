@@ -153,4 +153,14 @@ public class CreditCardService {
         }
         return null;
     }
+
+    public CreditCard checkCreditCardExists(String id) {
+        Optional<CreditCard> creditCard = creditCardRepository.findById(id);
+        if (creditCard.isEmpty()) {
+            return null;
+        }
+        else {
+            return creditCard.get();
+        }
+    }
 }
